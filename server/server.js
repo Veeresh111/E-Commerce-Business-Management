@@ -19,7 +19,7 @@ const commonFeatureRouter = require("./routes/common/feature-routes");
 //create a separate file for this and then import/use that file here
 
 mongoose
-  .connect("mongodb+srv://raov42824:V8aL83iB6Mm5z3tT@ecommerce.gibac.mongodb.net/")
+  .connect(" User should Own the key ")
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
 
