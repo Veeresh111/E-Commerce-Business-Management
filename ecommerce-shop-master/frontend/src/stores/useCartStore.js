@@ -40,7 +40,9 @@ export const useCartStore = create((set, get) => ({
 			get().calculateTotals();
 		} catch (error) {
 			set({ cart: [] });
-			toast.error(error.response.data.message || "An error occurred");
+			if (error.response?.status !== 401) {
+				toast.error(error.response?.data?.message || "An error occurred");
+			}
 		}
 	},
 	clearCart: async () => {

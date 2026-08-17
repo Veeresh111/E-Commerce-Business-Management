@@ -36,6 +36,51 @@ const userSchema = new mongoose.Schema(
 			enum: ["customer", "admin"],
 			default: "customer",
 		},
+		emailVerified: {
+			type: Boolean,
+			default: false,
+		},
+		emailVerificationToken: {
+			type: String,
+		},
+		emailVerificationExpires: {
+			type: Date,
+		},
+		resetPasswordToken: {
+			type: String,
+		},
+		resetPasswordExpires: {
+			type: Date,
+		},
+		// --- Deep Persona & Agentic Customization ---
+		profession: {
+			type: String,
+			default: "Software Engineer",
+		},
+		hobbies: {
+			type: [String],
+			default: ["Gaming", "Tech & Gadgets", "Fitness"],
+		},
+		interests: {
+			type: [String],
+			default: ["Cyberpunk Fashion", "Smart Home", "High-Performance Gear"],
+		},
+		location: {
+			city: { type: String, default: "San Francisco" },
+			state: { type: String, default: "CA" },
+			country: { type: String, default: "USA" },
+			region: { type: String, default: "US" },
+		},
+		// --- Agentic Browsing Telemetry ---
+		activityTelemetry: [
+			{
+				eventType: { type: String, required: true }, // "view_product", "search", "dwell", "category_click"
+				targetCategory: String,
+				targetId: String,
+				query: String,
+				timestamp: { type: Date, default: Date.now },
+			},
+		],
 	},
 	{
 		timestamps: true,

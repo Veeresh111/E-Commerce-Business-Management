@@ -11,4 +11,19 @@ export default defineConfig({
 			},
 		},
 	},
+	build: {
+		chunkSizeWarningLimit: 600,
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					react: ["react", "react-dom", "react-router-dom"],
+					recharts: ["recharts"],
+					animations: ["framer-motion"],
+					icons: ["lucide-react"],
+					payments: ["@stripe/stripe-js"],
+					state: ["zustand"],
+				},
+			},
+		},
+	},
 });

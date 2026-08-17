@@ -17,22 +17,36 @@ export const useUserStore = create((set, get) => ({
 
 		try {
 			const res = await axios.post("/auth/signup", { name, email, password });
-			set({ user: res.data, loading: false });
+			set({ user: res.data.user || res.data, loading: false });
+			toast.success("Account created successfully!");
 		} catch (error) {
 			set({ loading: false });
-			toast.error(error.response.data.message || "An error occurred");
+			toast.error(error.response?.data?.message || "Registration failed");
 		}
 	},
+
 	login: async (email, password) => {
 		set({ loading: true });
 
 		try {
 			const res = await axios.post("/auth/login", { email, password });
-
-			set({ user: res.data, loading: false });
+			set({ user: res.data.user || res.data, loading: false });
+			toast.success("Logged in successfully!");
 		} catch (error) {
 			set({ loading: false });
-			toast.error(error.response.data.message || "An error occurred");
+			toast.error(error.response?.data?.message || "Invalid email or password");
+		}
+	},
+
+	googleLogin: async ({ credential, email, name }) => {
+		set({ loading: true });
+		try {
+			const res = await axios.post("/auth/google", { credential, email, name });
+			set({ user: res.data.user || res.data, loading: false });
+			toast.success("Signed in with Google successfully!");
+		} catch (error) {
+			set({ loading: false });
+			toast.error(error.response?.data?.message || "Google authentication failed");
 		}
 	},
 
@@ -40,6 +54,7 @@ export const useUserStore = create((set, get) => ({
 		try {
 			await axios.post("/auth/logout");
 			set({ user: null });
+			toast.success("Logged out successfully");
 		} catch (error) {
 			toast.error(error.response?.data?.message || "An error occurred during logout");
 		}
@@ -49,15 +64,13 @@ export const useUserStore = create((set, get) => ({
 		set({ checkingAuth: true });
 		try {
 			const response = await axios.get("/auth/profile");
-			set({ user: response.data, checkingAuth: false });
+			set({ user: response.data.user || response.data, checkingAuth: false });
 		} catch (error) {
-			console.log(error.message);
 			set({ checkingAuth: false, user: null });
 		}
 	},
 
 	refreshToken: async () => {
-		// Prevent multiple simultaneous refresh attempts
 		if (get().checkingAuth) return;
 
 		set({ checkingAuth: true });
@@ -72,8 +85,6 @@ export const useUserStore = create((set, get) => ({
 	},
 }));
 
-// TODO: Implement the axios interceptors for refreshing access token
-
 // Axios interceptor for token refresh
 let refreshPromise = null;
 
@@ -81,24 +92,21 @@ axios.interceptors.response.use(
 	(response) => response,
 	async (error) => {
 		const originalRequest = error.config;
-		if (error.response?.status === 401 && !originalRequest._retry) {
+		if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes("/auth/profile")) {
 			originalRequest._retry = true;
 
 			try {
-				// If a refresh is already in progress, wait for it to complete
 				if (refreshPromise) {
 					await refreshPromise;
 					return axios(originalRequest);
 				}
 
-				// Start a new refresh process
 				refreshPromise = useUserStore.getState().refreshToken();
 				await refreshPromise;
 				refreshPromise = null;
 
 				return axios(originalRequest);
 			} catch (refreshError) {
-				// If refresh fails, redirect to login or handle as needed
 				useUserStore.getState().logout();
 				return Promise.reject(refreshError);
 			}

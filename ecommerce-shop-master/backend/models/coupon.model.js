@@ -24,14 +24,15 @@ const couponSchema = new mongoose.Schema(
 		userId: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "User",
-			required: true,
-			unique: true,
+			required: false,
 		},
 	},
 	{
 		timestamps: true,
 	}
 );
+
+couponSchema.index({ userId: 1 });
 
 const Coupon = mongoose.model("Coupon", couponSchema);
 

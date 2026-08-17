@@ -9,13 +9,17 @@ const PurchaseSuccessPage = () => {
 	const [isProcessing, setIsProcessing] = useState(true);
 	const { clearCart } = useCartStore();
 	const [error, setError] = useState(null);
+	const [orderId, setOrderId] = useState(null);
 
 	useEffect(() => {
 		const handleCheckoutSuccess = async (sessionId) => {
 			try {
-				await axios.post("/payments/checkout-success", {
+				const res = await axios.post("/payments/checkout-success", {
 					sessionId,
 				});
+				if (res.data?.orderId) {
+					setOrderId(res.data.orderId);
+				}
 				clearCart();
 			} catch (error) {
 				console.log(error);
@@ -61,12 +65,14 @@ const PurchaseSuccessPage = () => {
 						Thank you for your order. {"We're"} processing it now.
 					</p>
 					<p className='text-emerald-400 text-center text-sm mb-6'>
-						Check your email for order details and updates.
+						Track your order status anytime from the Orders page.
 					</p>
 					<div className='bg-gray-700 rounded-lg p-4 mb-6'>
 						<div className='flex items-center justify-between mb-2'>
 							<span className='text-sm text-gray-400'>Order number</span>
-							<span className='text-sm font-semibold text-emerald-400'>#12345</span>
+							<span className='text-sm font-semibold text-emerald-400'>
+								#{orderId ? orderId.slice(-8) : "Processing..."}
+							</span>
 						</div>
 						<div className='flex items-center justify-between'>
 							<span className='text-sm text-gray-400'>Estimated delivery</span>
